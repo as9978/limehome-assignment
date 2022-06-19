@@ -1,20 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useColorScheme } from "react-native";
+import { ThemeProvider } from "@shopify/restyle";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { QueryClient, QueryClientProvider } from "react-query";
+
+import { darkTheme, theme } from "./src/theme";
+import Navigation from "./src/navigation";
+import useCachedResources from "./src/hooks/useCachedResources";
+
+const client = new QueryClient();
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const isLoadingComplete = useCachedResources();
+  const colorScheme = useColorScheme();
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  if (!isLoadingComplete) {
+    return null;
+  } else {
+    return (
+      <QueryClientProvider {...{ client }}>
+        <ThemeProvider theme={colorScheme === "light" ? theme : darkTheme}>
+          <SafeAreaProvider>
+            <Navigation {...{ colorScheme }} />
+          </SafeAreaProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+  }
+}
